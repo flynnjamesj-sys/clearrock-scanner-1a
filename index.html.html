@@ -1,0 +1,764 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ClearRock Scanner — SAM.gov Opportunity Intelligence</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #060b12;
+    --surface: #0d1117;
+    --surface2: #080e17;
+    --border: #1e2a38;
+    --border2: #2d4a6a;
+    --text: #e2e8f0;
+    --text2: #94a3b8;
+    --text3: #475569;
+    --blue: #7cb9e8;
+    --blue-dark: #1a4d8a;
+    --blue-btn: #0ea5e9;
+    --green: #4ade80;
+    --orange: #fb923c;
+    --red: #f87171;
+    --mono: 'IBM Plex Mono', monospace;
+    --sans: 'IBM Plex Sans', sans-serif;
+  }
+
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--sans);
+    min-height: 100vh;
+  }
+
+  /* ── HEADER ── */
+  header {
+    background: var(--surface2);
+    border-bottom: 1px solid var(--border);
+    padding: 16px 24px;
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .logo-mark {
+    width: 34px; height: 34px;
+    border-radius: 7px;
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-btn) 100%);
+    display: flex; align-items: center; justify-content: center;
+    font-family: var(--mono);
+    font-weight: 600;
+    font-size: 13px;
+    color: #fff;
+    flex-shrink: 0;
+  }
+
+  .brand-name { font-size: 16px; font-weight: 700; color: var(--text); letter-spacing: -0.02em; }
+  .brand-sub { font-size: 10px; font-family: var(--mono); color: var(--green); letter-spacing: 0.06em; text-transform: uppercase; }
+
+  /* ── BODY ── */
+  main { max-width: 900px; margin: 0 auto; padding: 24px 20px 60px; }
+
+  /* ── SECTION LABEL ── */
+  .label {
+    font-family: var(--mono);
+    font-size: 10px;
+    color: var(--text3);
+    letter-spacing: 0.08em;
+    text-transform: uppercase;
+    display: block;
+    margin-bottom: 8px;
+  }
+
+  /* ── NAICS PILLS ── */
+  .pill-row { display: flex; gap: 8px; flex-wrap: wrap; margin-bottom: 18px; }
+
+  .pill {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 6px 13px;
+    border-radius: 20px;
+    cursor: pointer;
+    transition: all 0.15s;
+    user-select: none;
+  }
+
+  .pill.active { background: #1a3d6b; border-color: #2d5a9e; color: var(--blue); }
+  .pill:hover { border-color: var(--border2); }
+
+  /* ── GRID ── */
+  .grid-2 { display: grid; grid-template-columns: 1fr 1fr; gap: 14px; margin-bottom: 18px; }
+  @media (max-width: 500px) { .grid-2 { grid-template-columns: 1fr; } }
+
+  /* ── SELECT ── */
+  select {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 12px;
+    padding: 9px 11px;
+    outline: none;
+    cursor: pointer;
+    appearance: none;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='12' height='12' viewBox='0 0 12 12'%3E%3Cpath fill='%23475569' d='M6 8L1 3h10z'/%3E%3C/svg%3E");
+    background-repeat: no-repeat;
+    background-position: right 10px center;
+  }
+
+  select:focus { border-color: var(--border2); }
+
+  /* ── INPUT ── */
+  input[type=text] {
+    width: 100%;
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    color: var(--text);
+    font-family: var(--mono);
+    font-size: 13px;
+    padding: 9px 13px;
+    outline: none;
+    margin-bottom: 18px;
+  }
+
+  input[type=text]:focus { border-color: var(--border2); }
+  input[type=text]::placeholder { color: var(--text3); }
+
+  /* ── SEARCH BTN ── */
+  #searchBtn {
+    width: 100%;
+    background: linear-gradient(135deg, var(--blue-dark) 0%, var(--blue-btn) 100%);
+    border: none;
+    border-radius: 8px;
+    color: #fff;
+    font-family: var(--mono);
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 0.07em;
+    padding: 13px;
+    cursor: pointer;
+    text-transform: uppercase;
+    transition: opacity 0.15s;
+    margin-bottom: 20px;
+  }
+
+  #searchBtn:disabled { opacity: 0.5; cursor: not-allowed; }
+  #searchBtn:hover:not(:disabled) { opacity: 0.9; }
+
+  /* ── DIVIDER ── */
+  hr { border: none; border-top: 1px solid var(--border); margin: 20px 0; }
+
+  /* ── RESULTS HEADER ── */
+  .results-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding-bottom: 12px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 16px;
+  }
+
+  .results-count { font-size: 14px; font-weight: 700; color: var(--text); }
+  .results-meta { font-family: var(--mono); font-size: 10px; color: var(--text3); }
+
+  /* ── CARD ── */
+  .card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    transition: border-color 0.2s;
+    animation: fadeUp 0.35s ease both;
+  }
+
+  .card:hover { border-color: var(--border2); }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(8px); }
+    to   { opacity: 1; transform: translateY(0); }
+  }
+
+  .card-header { padding: 14px 16px 10px; }
+  .card-badges { display: flex; gap: 6px; flex-wrap: wrap; margin-bottom: 8px; }
+
+  .badge {
+    font-family: var(--mono);
+    font-size: 10px;
+    font-weight: 600;
+    padding: 2px 7px;
+    border-radius: 3px;
+    letter-spacing: 0.04em;
+    white-space: nowrap;
+  }
+
+  .badge-type { border: 1px solid currentColor; }
+  .badge-solid { color: #fff; }
+  .badge-naics { background: var(--border); color: var(--blue); }
+  .badge-value { background: #1a2e1a; color: var(--green); }
+  .badge-ai { background: #0a1624; color: var(--blue); border: 1px solid #1e3a5c; }
+
+  .card-title { font-size: 14px; font-weight: 600; color: var(--text); line-height: 1.4; margin-bottom: 5px; }
+  .card-agency { font-family: var(--mono); font-size: 11px; color: var(--text3); white-space: nowrap; overflow: hidden; text-overflow: ellipsis; }
+
+  /* ── DEADLINE BAR ── */
+  .deadline-bar {
+    padding: 7px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-top: 1px solid transparent;
+    border-bottom: 1px solid var(--border);
+    font-family: var(--mono);
+    font-size: 10px;
+  }
+
+  .deadline-label { color: var(--text3); margin-right: 4px; }
+  .deadline-days { font-size: 11px; font-weight: 700; letter-spacing: 0.04em; }
+
+  /* ── CARD BODY ── */
+  .card-body { padding: 10px 16px 14px; }
+  .card-location { font-family: var(--mono); font-size: 11px; color: var(--text3); margin-bottom: 6px; }
+
+  .card-desc {
+    font-size: 12px;
+    color: var(--text2);
+    line-height: 1.65;
+    margin-bottom: 6px;
+    display: -webkit-box;
+    -webkit-line-clamp: 2;
+    -webkit-box-orient: vertical;
+    overflow: hidden;
+  }
+
+  .card-desc.expanded { display: block; -webkit-line-clamp: unset; }
+
+  .toggle-desc {
+    background: none; border: none;
+    color: #3b82f6; font-family: var(--mono);
+    font-size: 10px; cursor: pointer;
+    padding: 0 0 8px; letter-spacing: 0.04em;
+  }
+
+  .card-actions { display: flex; gap: 8px; flex-wrap: wrap; margin-top: 8px; }
+
+  .btn-sam {
+    background: #1a2d4a;
+    border: 1px solid var(--border2);
+    color: var(--blue);
+    font-family: var(--mono);
+    font-size: 11px;
+    font-weight: 600;
+    padding: 5px 11px;
+    border-radius: 4px;
+    text-decoration: none;
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+
+  .btn-sam:hover { background: #243d5a; }
+
+  .btn-ai {
+    background: none;
+    border: 1px dashed var(--border2);
+    color: #3b82f6;
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 11px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+
+  .btn-ai:hover { background: #0a1624; border-color: #3b82f6; }
+  .btn-ai:disabled { opacity: 0.5; cursor: not-allowed; }
+
+  .notice-id {
+    background: #141414;
+    border: 1px solid var(--border);
+    color: var(--text3);
+    font-family: var(--mono);
+    font-size: 11px;
+    padding: 5px 11px;
+    border-radius: 4px;
+    user-select: all;
+  }
+
+  /* ── AI ESTIMATE PANEL ── */
+  .ai-panel {
+    background: #0a1220;
+    border: 1px solid #1e3a5c;
+    border-radius: 6px;
+    padding: 10px 14px;
+    margin-top: 8px;
+  }
+
+  .ai-panel-row { display: flex; align-items: baseline; gap: 8px; flex-wrap: wrap; margin-bottom: 4px; }
+  .ai-value { font-family: var(--mono); font-size: 15px; font-weight: 700; color: var(--blue); }
+  .ai-conf { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .ai-fit  { font-family: var(--mono); font-size: 10px; text-transform: uppercase; letter-spacing: 0.06em; }
+  .ai-reason { font-size: 11px; color: var(--text3); line-height: 1.5; }
+
+  /* ── INFO / ERROR BOXES ── */
+  .info-box {
+    background: #0a1624;
+    border: 1px solid #1e3a5c;
+    border-radius: 8px;
+    padding: 16px;
+    color: var(--blue);
+    font-size: 13px;
+    line-height: 1.7;
+    margin-top: 16px;
+  }
+
+  .info-box ol { padding-left: 18px; color: var(--text2); margin-top: 6px; }
+  .info-box li { margin-bottom: 4px; }
+  .info-box strong { color: var(--blue); }
+
+  .error-box {
+    background: #1a0a0a;
+    border: 1px solid #7f1d1d;
+    border-radius: 8px;
+    padding: 14px 16px;
+    color: var(--red);
+    font-family: var(--mono);
+    font-size: 12px;
+    line-height: 1.6;
+    margin-top: 14px;
+  }
+
+  /* ── SPIN ── */
+  @keyframes spin { to { transform: rotate(360deg); } }
+  .spin { display: inline-block; animation: spin 1s linear infinite; }
+
+  /* ── FOOTER ── */
+  footer {
+    text-align: center;
+    font-family: var(--mono);
+    font-size: 10px;
+    color: #1e2a38;
+    margin-top: 40px;
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="logo-mark">CR</div>
+  <div>
+    <div class="brand-name">ClearRock Scanner</div>
+    <div class="brand-sub">● SAM.gov Opportunity Intelligence</div>
+  </div>
+</header>
+
+<main>
+
+  <!-- NAICS -->
+  <span class="label">NAICS Codes</span>
+  <div class="pill-row" id="naicsPills">
+    <div class="pill active" data-code="459120">459120 — Office Supplies</div>
+    <div class="pill active" data-code="424120">424120 — Paper & Janitorial</div>
+    <div class="pill active" data-code="423420">423420 — Office Equipment</div>
+  </div>
+
+  <!-- Filters row 1 -->
+  <div class="grid-2">
+    <div>
+      <span class="label">Set-Aside</span>
+      <select id="setAside">
+        <option value="SBA">Small Business</option>
+        <option value="8A">8(a)</option>
+        <option value="HZC">HUBZone</option>
+        <option value="VSB">Veteran-Owned</option>
+        <option value="SDVOSBC">SDVOSB</option>
+        <option value="">Any / No Set-Aside</option>
+      </select>
+    </div>
+    <div>
+      <span class="label">Opportunity Type</span>
+      <select id="oppType">
+        <option value="">All Types</option>
+        <option value="o">Solicitation</option>
+        <option value="p">Presolicitation</option>
+        <option value="k">Combined Synopsis</option>
+        <option value="r">Sources Sought</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Filters row 2 -->
+  <div class="grid-2">
+    <div>
+      <span class="label">Sort By</span>
+      <select id="sortBy">
+        <option value="-modifiedDate">Most Recent</option>
+        <option value="modifiedDate">Oldest First</option>
+        <option value="title">Title A–Z</option>
+        <option value="ai-value-high">Est. Value: High → Low</option>
+        <option value="ai-value-low">Est. Value: Low → High</option>
+      </select>
+    </div>
+    <div>
+      <span class="label">Posted Within</span>
+      <select id="daysBack">
+        <option value="7">Last 7 days</option>
+        <option value="14">Last 14 days</option>
+        <option value="30" selected>Last 30 days</option>
+        <option value="60">Last 60 days</option>
+        <option value="90">Last 90 days</option>
+      </select>
+    </div>
+  </div>
+
+  <!-- Keywords -->
+  <span class="label">Keyword Filter (Optional)</span>
+  <input type="text" id="keywords" placeholder="e.g. toner, paper, office supplies...">
+
+  <!-- Result count -->
+  <span class="label">Results</span>
+  <div class="pill-row" id="limitPills" style="margin-bottom:18px">
+    <div class="pill" data-limit="10">10</div>
+    <div class="pill active" data-limit="25">25</div>
+    <div class="pill" data-limit="50">50</div>
+  </div>
+
+  <button id="searchBtn">⌕ &nbsp;Search Opportunities</button>
+
+  <div id="statusBox"></div>
+  <div id="resultsArea"></div>
+
+  <footer>CLEARROCK ACQUISITION GROUP LLC · SAM.GOV OPPORTUNITY SCANNER</footer>
+</main>
+
+<script>
+// ── CONFIG ────────────────────────────────────────────────────────────────────
+const WORKER = [
+  "https://",
+  "blue-poetry-50a3",
+  ".flynnjank.workers.dev"
+].join("");
+
+// ── STATE ─────────────────────────────────────────────────────────────────────
+let selectedNaics = ["459120","424120","423420"];
+let selectedLimit = 25;
+let isLoading = false;
+
+// ── HELPERS ───────────────────────────────────────────────────────────────────
+function fmtDate(s) {
+  if (!s) return "—";
+  try { return new Date(s).toLocaleDateString("en-US",{month:"short",day:"numeric",year:"numeric"}); }
+  catch { return s; }
+}
+
+function fmtCurrency(v) {
+  if (v == null) return null;
+  const n = parseFloat(v);
+  if (isNaN(n)) return String(v);
+  if (n >= 1e6) return "$" + (n/1e6).toFixed(1) + "M";
+  if (n >= 1000) return "$" + (n/1000).toFixed(0) + "K";
+  return "$" + n.toLocaleString("en-US",{maximumFractionDigits:0});
+}
+
+function daysLeft(s) {
+  if (!s) return null;
+  return Math.ceil((new Date(s) - new Date()) / 86400000);
+}
+
+function urgencyStyle(d) {
+  if (d === null) return {bg:"#141414",text:"#94a3b8",border:"#1e293b",label:""};
+  if (d < 0)  return {bg:"#1a1a1a",text:"#555",border:"#222",label:"CLOSED"};
+  if (d <= 3) return {bg:"#2d0a0a",text:"#f87171",border:"#7f1d1d",label:d===0?"TODAY":d===1?"1 DAY":`${d}D LEFT`};
+  if (d <= 7) return {bg:"#2d1b00",text:"#fb923c",border:"#7c2d12",label:`${d}D LEFT`};
+  if (d <= 14)return {bg:"#1a2200",text:"#a3e635",border:"#3f5200",label:`${d}D LEFT`};
+  return {bg:"#0a1a0f",text:"#4ade80",border:"#14532d",label:`${d}D LEFT`};
+}
+
+const SET_ASIDE_MAP = {
+  SBA:{label:"SB",color:"#2a7a4b"}, "8A":{label:"8(a)",color:"#1a5fa8"},
+  HZC:{label:"HUBZone",color:"#6b21a8"}, VSB:{label:"VOSB",color:"#b45309"},
+  SDVOSBC:{label:"SDVOSB",color:"#0e7490"}, WOSB:{label:"WOSB",color:"#be185d"},
+};
+
+const TYPE_MAP = {
+  o:{label:"Solicitation",color:"#1d4ed8"}, p:{label:"Presolicitation",color:"#4338ca"},
+  k:{label:"Combined",color:"#0891b2"}, r:{label:"Sources Sought",color:"#059669"},
+};
+
+const FIT_COLOR  = {good:"#4ade80",moderate:"#fb923c",poor:"#f87171"};
+const CONF_COLOR = {high:"#4ade80",medium:"#fb923c",low:"#94a3b8"};
+
+function buildQuery() {
+  const today = new Date();
+  const from  = new Date(today);
+  from.setDate(from.getDate() - parseInt(document.getElementById("daysBack").value));
+  const fmt = d => String(d.getMonth()+1).padStart(2,"0")+"/"+String(d.getDate()).padStart(2,"0")+"/"+d.getFullYear();
+  const p = new URLSearchParams();
+  p.set("limit", String(selectedLimit));
+  p.set("offset","0");
+  p.set("postedFrom", fmt(from));
+  p.set("postedTo",   fmt(today));
+  p.set("active","Yes");
+  if (selectedNaics.length) p.set("naicsCode", selectedNaics.join(","));
+  const sa = document.getElementById("setAside").value;
+  if (sa) p.set("typeOfSetAside", sa);
+  const ot = document.getElementById("oppType").value;
+  if (ot) p.set("ptype", ot);
+  const kw = document.getElementById("keywords").value.trim();
+  if (kw) p.set("q", kw);
+  const sb = document.getElementById("sortBy").value;
+  const samSort = sb.startsWith("ai-") ? "-modifiedDate" : sb;
+  if (samSort) p.set("sort", samSort);
+  return p.toString();
+}
+
+// ── CARD RENDERER ─────────────────────────────────────────────────────────────
+function renderCard(opp, idx, aiEst) {
+  const dl    = daysLeft(opp.responseDeadLine || opp.archiveDate);
+  const us    = urgencyStyle(dl);
+  const type  = TYPE_MAP[opp.type] || {label:opp.type||"Notice",color:"#64748b"};
+  const sa    = SET_ASIDE_MAP[opp.typeOfSetAside];
+  const desc  = (opp.description||"").replace(/<[^>]+>/g,"").slice(0,600);
+  const popStr = opp.placeOfPerformance
+    ? [opp.placeOfPerformance.city?.name, opp.placeOfPerformance.state?.code].filter(Boolean).join(", ")
+    : "";
+  const uiLink = opp.uiLink || (opp.noticeId ? "https://sam.gov/opp/"+opp.noticeId+"/view" : null);
+  const nid   = opp.noticeId || opp.solicitationNumber || "";
+  const hasVal= opp.award?.amount != null;
+
+  const card = document.createElement("div");
+  card.className = "card";
+  card.style.animationDelay = (idx * 45) + "ms";
+
+  // Badges
+  let badges = `<span class="badge badge-type" style="color:${type.color};border-color:${type.color}">${type.label}</span>`;
+  if (sa) badges += `<span class="badge badge-solid" style="background:${sa.color}">${sa.label}</span>`;
+  if (opp.naicsCode) badges += `<span class="badge badge-naics">${opp.naicsCode}</span>`;
+  if (hasVal) badges += `<span class="badge badge-value">${fmtCurrency(opp.award.amount)}</span>`;
+  if (!hasVal && aiEst) badges += `<span class="badge badge-ai">~${fmtCurrency(aiEst.estimatedMin)}–${fmtCurrency(aiEst.estimatedMax)}</span>`;
+
+  // AI panel HTML
+  let aiHTML = "";
+  if (aiEst) {
+    aiHTML = `
+      <div class="ai-panel">
+        <div class="ai-panel-row">
+          <span class="ai-value">~${fmtCurrency(aiEst.estimatedMin)} – ${fmtCurrency(aiEst.estimatedMax)}</span>
+          ${aiEst.confidence ? `<span class="ai-conf" style="color:${CONF_COLOR[aiEst.confidence]||"#94a3b8"}">${aiEst.confidence} confidence</span>` : ""}
+          ${aiEst.clearrockFit ? `<span class="ai-fit" style="color:${FIT_COLOR[aiEst.clearrockFit]||"#94a3b8"}">${aiEst.clearrockFit} fit</span>` : ""}
+        </div>
+        ${aiEst.fitReason ? `<div class="ai-reason" style="color:${FIT_COLOR[aiEst.clearrockFit]||"#64748b"}">${aiEst.fitReason}</div>` : ""}
+      </div>`;
+  }
+
+  card.innerHTML = `
+    <div class="card-header">
+      <div class="card-badges">${badges}</div>
+      <div class="card-title">${opp.title || "Untitled Opportunity"}</div>
+      <div class="card-agency">${opp.fullParentPathName || opp.departmentName || "Agency not specified"}</div>
+    </div>
+    <div class="deadline-bar" style="background:${us.bg};border-top-color:${us.border}">
+      <span><span class="deadline-label">DUE</span>${fmtDate(opp.responseDeadLine || opp.archiveDate)}</span>
+      <span class="deadline-days" style="color:${us.text}">${us.label}</span>
+      <span><span class="deadline-label">POSTED</span>${fmtDate(opp.postedDate)}</span>
+    </div>
+    <div class="card-body">
+      ${popStr ? `<div class="card-location">📍 ${popStr}</div>` : ""}
+      ${desc ? `
+        <div class="card-desc" id="desc-${idx}">${desc}${(opp.description||"").length > 300 ? "…" : ""}</div>
+        ${(opp.description||"").length > 150 ? `<button class="toggle-desc" onclick="toggleDesc(${idx})">▼ MORE</button>` : ""}
+      ` : ""}
+      ${aiHTML}
+      ${!aiEst ? `<div id="ai-${idx}" style="margin-bottom:8px"><button class="btn-ai" onclick="fetchAI(this, ${idx})" data-opp='${JSON.stringify({title:opp.title,description:(opp.description||"").slice(0,500),naicsCode:opp.naicsCode,agency:opp.fullParentPathName||opp.departmentName||""}).replace(/'/g,"&#39;")}'>✦ AI Estimate</button></div>` : ""}
+      <div class="card-actions">
+        ${uiLink ? `<a class="btn-sam" href="${uiLink}" target="_blank" rel="noopener">↗ SAM.GOV</a>` : ""}
+        ${nid ? `<span class="notice-id">${nid}</span>` : ""}
+      </div>
+    </div>`;
+
+  return card;
+}
+
+function toggleDesc(idx) {
+  const el = document.getElementById("desc-"+idx);
+  const btn = el.nextElementSibling;
+  if (el.classList.contains("expanded")) {
+    el.classList.remove("expanded");
+    btn.textContent = "▼ MORE";
+  } else {
+    el.classList.add("expanded");
+    btn.textContent = "▲ LESS";
+  }
+}
+
+async function fetchAI(btn, idx) {
+  const opp = JSON.parse(btn.getAttribute("data-opp").replace(/&#39;/g,"'"));
+  btn.disabled = true;
+  btn.textContent = "⟳ Analyzing...";
+  try {
+    const r = await fetch(WORKER + "/ai/estimate", {
+      method: "POST",
+      headers: {"Content-Type":"application/json"},
+      body: JSON.stringify(opp)
+    });
+    const est = await r.json();
+    if (est.error) throw new Error(est.error);
+    const container = document.getElementById("ai-"+idx);
+    const fitColor  = FIT_COLOR[est.clearrockFit]  || "#94a3b8";
+    const confColor = CONF_COLOR[est.confidence]    || "#94a3b8";
+    container.innerHTML = `
+      <div class="ai-panel">
+        <div class="ai-panel-row">
+          <span class="ai-value">~${fmtCurrency(est.estimatedMin)} – ${fmtCurrency(est.estimatedMax)}</span>
+          ${est.confidence ? `<span class="ai-conf" style="color:${confColor}">${est.confidence} confidence</span>` : ""}
+          ${est.clearrockFit ? `<span class="ai-fit" style="color:${fitColor}">${est.clearrockFit} fit</span>` : ""}
+        </div>
+        ${est.fitReason ? `<div class="ai-reason" style="color:${fitColor}">${est.fitReason}</div>` : ""}
+        ${est.rationale ? `<div class="ai-reason">${est.rationale}</div>` : ""}
+      </div>`;
+  } catch(e) {
+    btn.textContent = "⚠ " + e.message.slice(0,40);
+    btn.disabled = false;
+  }
+}
+
+// ── SEARCH ────────────────────────────────────────────────────────────────────
+async function runSearch() {
+  if (isLoading) return;
+  if (!selectedNaics.length) { showError("Select at least one NAICS code."); return; }
+
+  isLoading = true;
+  const btn = document.getElementById("searchBtn");
+  btn.disabled = true;
+  btn.textContent = "⟳  Searching SAM.gov...";
+  document.getElementById("statusBox").innerHTML = "";
+  document.getElementById("resultsArea").innerHTML = "";
+
+  try {
+    const url = WORKER + "/sam/search?" + buildQuery();
+    const res = await fetch(url);
+    if (!res.ok) {
+      const t = await res.text();
+      throw new Error("SAM.gov Error " + res.status + ": " + t.slice(0,120));
+    }
+    const data = await res.json();
+    let opps = data.opportunitiesData || data._embedded?.opportunitiesData || [];
+    const total = data.totalRecords || opps.length;
+
+    const sortBy = document.getElementById("sortBy").value;
+
+    // AI sort — fetch all estimates then sort
+    if (sortBy.startsWith("ai-") && opps.length > 0) {
+      document.getElementById("statusBox").innerHTML = `
+        <div class="info-box">
+          <span class="spin">⟳</span> Running AI value estimates on ${opps.length} results… this takes ~15 seconds.
+        </div>`;
+
+      const estimates = {};
+      await Promise.all(opps.map(async (opp) => {
+        try {
+          const r = await fetch(WORKER + "/ai/estimate", {
+            method:"POST", headers:{"Content-Type":"application/json"},
+            body: JSON.stringify({
+              title:opp.title,
+              description:(opp.description||"").slice(0,500),
+              naicsCode:opp.naicsCode,
+              agency:opp.fullParentPathName||opp.departmentName||""
+            })
+          });
+          const est = await r.json();
+          if (!est.error) estimates[opp.noticeId||opp.solicitationNumber] = est;
+        } catch {}
+      }));
+
+      const dir = sortBy === "ai-value-high" ? -1 : 1;
+      opps = [...opps].sort((a,b) => {
+        const aId = a.noticeId||a.solicitationNumber;
+        const bId = b.noticeId||b.solicitationNumber;
+        const aV = estimates[aId]?.estimatedMax ?? (dir===-1?-Infinity:Infinity);
+        const bV = estimates[bId]?.estimatedMax ?? (dir===-1?-Infinity:Infinity);
+        return dir*(bV-aV);
+      });
+
+      document.getElementById("statusBox").innerHTML = "";
+
+      const area = document.getElementById("resultsArea");
+      renderResultsHeader(area, opps.length, total);
+      opps.forEach((opp, i) => {
+        const id = opp.noticeId||opp.solicitationNumber;
+        area.appendChild(renderCard(opp, i, estimates[id]||null));
+      });
+    } else {
+      const area = document.getElementById("resultsArea");
+      renderResultsHeader(area, opps.length, total);
+      if (opps.length === 0) {
+        area.innerHTML += `<div class="info-box">No active opportunities matched your filters. Try expanding the date range or removing the set-aside filter.</div>`;
+      } else {
+        opps.forEach((opp, i) => area.appendChild(renderCard(opp, i, null)));
+      }
+    }
+
+  } catch(e) {
+    showError(e.message);
+  } finally {
+    isLoading = false;
+    btn.disabled = false;
+    btn.textContent = "⌕  Search Opportunities";
+  }
+}
+
+function renderResultsHeader(area, shown, total) {
+  const hdr = document.createElement("div");
+  hdr.className = "results-header";
+  hdr.innerHTML = `
+    <span class="results-count">${shown} results ${total > shown ? `<span style="font-size:11px;color:var(--text3);font-weight:400">of ${total.toLocaleString()} total</span>` : ""}</span>
+    <span class="results-meta">${selectedNaics.join(" · ")}</span>`;
+  area.appendChild(hdr);
+}
+
+function showError(msg) {
+  document.getElementById("statusBox").innerHTML = `<div class="error-box"><strong>Error:</strong> ${msg}</div>`;
+}
+
+// ── PILL INTERACTION ──────────────────────────────────────────────────────────
+document.querySelectorAll("#naicsPills .pill").forEach(p => {
+  p.addEventListener("click", () => {
+    const code = p.dataset.code;
+    if (selectedNaics.includes(code)) {
+      selectedNaics = selectedNaics.filter(c => c !== code);
+      p.classList.remove("active");
+    } else {
+      selectedNaics.push(code);
+      p.classList.add("active");
+    }
+  });
+});
+
+document.querySelectorAll("#limitPills .pill").forEach(p => {
+  p.addEventListener("click", () => {
+    selectedLimit = parseInt(p.dataset.limit);
+    document.querySelectorAll("#limitPills .pill").forEach(x => x.classList.remove("active"));
+    p.classList.add("active");
+  });
+});
+
+document.getElementById("keywords").addEventListener("keydown", e => {
+  if (e.key === "Enter") runSearch();
+});
+
+document.getElementById("searchBtn").addEventListener("click", runSearch);
+</script>
+</body>
+</html>
